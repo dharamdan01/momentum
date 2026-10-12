@@ -18,7 +18,7 @@ def get_stats(db: Session = Depends(get_db)):
     all_tasks = db.query(Task).all()
     members = db.query(Member).all()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     cutoff = now + timedelta(days=7)
     upcoming = (
         db.query(Task)

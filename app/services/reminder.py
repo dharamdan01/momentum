@@ -5,7 +5,7 @@ from ..models import Task, TaskStatus, Member
 
 def check_overdue_tasks(db: Session) -> list[dict]:
     """Find tasks that are past their deadline and not completed."""
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     overdue = (
         db.query(Task)
         .filter(Task.deadline < now, Task.status != TaskStatus.COMPLETED)
@@ -30,7 +30,7 @@ def check_overdue_tasks(db: Session) -> list[dict]:
 
 def get_upcoming_deadlines(db: Session, days: int = 3) -> list[dict]:
     """Get tasks with deadlines in the next N days."""
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     cutoff = now + timedelta(days=days)
     upcoming = (
         db.query(Task)
