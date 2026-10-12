@@ -32,7 +32,7 @@ AI-powered meeting intelligence — so nothing falls through the cracks.
 
 <br>
 
-[Features](#features) · [Architecture](#system-architecture) · [Quick Start](#quick-start) · [API Reference](#api-reference) · [User Manual](#user-manual)
+[Features](#features) · [Architecture](#system-architecture) · [Quick Start](#quick-start) · [API Reference](#api-reference) · [User Manual](docs/USER_MANUAL.md)
 
 <br>
 
