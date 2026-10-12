@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micro Turners</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div class="splash-screen" id="splash">
+    <div class="splash-logo">
+      <div class="splash-icon">MT</div>
+      <div class="splash-text">Micro Turners</div>
+      <div class="splash-sub">Loading your workspace...</div>
+    </div>
+  </div>
+
+  <!-- Background & Overlays -->
+  <div class="mesh-gradient"></div>
+  <div id="toast-container"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Command Palette -->
+  <div class="cmd-overlay" id="cmd-overlay">
+    <div class="cmd-palette">
+      <div class="cmd-palette-header">
+        <span class="cmd-search-icon">&#128269;</span>
+        <input
+          type="text"
+          class="cmd-palette-input"
+          id="cmd-input"
+          placeholder="Type a command or search..."
+          autocomplete="off"
+        >
+        <kbd class="cmd-esc">ESC</kbd>
+      </div>
+      <div class="cmd-palette-results" id="cmd-results"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">MT</div>
+      <div class="logo-text">
+        <h1>Micro Turners</h1>
+        <span>Meeting & Task Manager</span>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <nav>
+        <button class="active" data-page="dashboard">
+          <span class="nav-icon">&#9638;</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        <button data-page="meetings">
+          <span class="nav-icon">&#128197;</span>
+          <span class="nav-label">Meetings</span>
+        </button>
+        <button data-page="tasks">
+          <span class="nav-icon">&#9745;</span>
+          <span class="nav-label">Tasks</span>
+        </button>
+        <button data-page="team">
+          <span class="nav-icon">&#128101;</span>
+          <span class="nav-label">Team</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <button class="cmd-trigger" onclick="openCmdPalette()" title="Command Palette (Ctrl+K)">
+        <span>&#128269;</span>
+        <span class="cmd-trigger-text">Search...</span>
+        <kbd>&#8984;K</kbd>
+      </button>
+
+      <button class="notif-bell" id="notif-bell" onclick="navigateTo('dashboard')" title="Notifications">
+        &#128276;
+        <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+      </button>
+
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme (T)">
+        <span class="icon-sun">&#9728;</span>
+        <span class="icon-moon">&#9790;</span>
+      </button>
+
+      <div class="user-profile" id="user-profile">
+        <div class="user-avatar" id="user-avatar">SB</div>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-header">
+            <div class="user-avatar-lg">SB</div>
+            <div>
+              <div class="user-dropdown-name">Swagata Banerjee</div>
+              <div class="user-dropdown-role">Consultant</div>
+            </div>
+          </div>
+          <div class="user-dropdown-sep"></div>
+          <div class="user-dropdown-item" onclick="openModal('shortcuts-modal')">
+            &#9000; Keyboard Shortcuts
+          </div>
+          <div class="user-dropdown-item" onclick="toggleTheme()">
+            &#127763; Toggle Theme
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div class="page-header-top">
+          <div>
+            <h2 id="greeting-heading">Good afternoon</h2>
+            <p id="greeting-text">Here's what's happening at Micro Turners today</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost" onclick="openModal('meeting-modal')">+ Meeting</button>
+            <button class="btn btn-primary" onclick="openModal('task-modal')">+ New Task</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="alerts-container"></div>
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <div class="card fade-in-up" style="animation-delay: 0.2s;">
+        <div class="card-header">
+          <h2>Completion Overview</h2>
+        </div>
+        <div class="card-body">
+          <div id="progress-overview" class="progress-overview"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2>Upcoming Deadlines</h2>
+            <span class="card-badge" id="deadline-count">0</span>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Assignee</th>
+                    <th>Deadline</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="upcoming-deadlines"></tbody>
+              </table>
+            </div>
+            <div id="no-deadlines" class="empty-state" style="display: none; padding: 40px 20px;">
+              <div class="icon">&#10003;</div>
+              <h3>All clear</h3>
+              <p>No upcoming deadlines this week</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Recent Activity</h2>
+          </div>
+          <div class="card-body">
+            <div id="activity-feed" class="activity-feed"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Team Workload</h2>
+        </div>
+        <div class="card-body">
+          <div id="member-summary" class="member-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MEETINGS ==================== -->
+    <div id="page-meetings" class="page">
+      <div class="page-header">
+        <div class="page-header-top">
+          <div>
+            <h2>Meetings</h2>
+            <p>Record, transcribe, and generate MOMs automatically</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('meeting-modal')">+ New Meeting</button>
+        </div>
+      </div>
+      <div id="meetings-list"></div>
+      <div id="no-meetings" class="empty-state" style="display: none;">
+        <div class="icon">&#128221;</div>
+        <h3>No meetings yet</h3>
+        <p>Create your first meeting to get started</p>
+      </div>
+    </div>
+
+    <!-- ==================== TASKS ==================== -->
+    <div id="page-tasks" class="page">
+      <div class="page-header">
+        <div class="page-header-top">
+          <div>
+            <h2>Tasks</h2>
+            <p>Track and manage all action items</p>
+          </div>
+          <div class="header-actions">
+            <div class="view-toggle">
+              <button class="active" id="view-list" onclick="setTaskView('list')" title="List view">
+                &#9776;
+              </button>
+              <button id="view-board" onclick="setTaskView('board')" title="Board view">
+                &#9638;
+              </button>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('task-modal')">+ New Task</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div id="tasks-list-view" class="card">
+        <div class="card-header">
+          <div class="search-bar">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="task-search" placeholder="Search tasks..." oninput="loadTasks()">
+          </div>
+          <div class="header-actions">
+            <select id="filter-status" class="filter-select" onchange="loadTasks()">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <select id="filter-member" class="filter-select" onchange="loadTasks()"></select>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Assignee</th>
+                  <th>Deadline</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th style="width: 60px;"></th>
+                </tr>
+              </thead>
+              <tbody id="tasks-table"></tbody>
+            </table>
+          </div>
+          <div id="no-tasks" class="empty-state" style="display: none;">
+            <div class="icon">&#9745;</div>
+            <h3>No tasks found</h3>
+            <p>Create a task or adjust your filters</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Board View -->
+      <div id="tasks-board-view" class="kanban-board" style="display: none;">
+        <div class="kanban-column" data-status="pending">
+          <div class="kanban-column-header">
+            <span class="kanban-dot dot-pending"></span>Pending
+            <span class="kanban-count" id="kanban-pending-count">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-pending"></div>
+        </div>
+        <div class="kanban-column" data-status="in_progress">
+          <div class="kanban-column-header">
+            <span class="kanban-dot dot-progress"></span>In Progress
+            <span class="kanban-count" id="kanban-in_progress-count">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-in_progress"></div>
+        </div>
+        <div class="kanban-column" data-status="completed">
+          <div class="kanban-column-header">
+            <span class="kanban-dot dot-done"></span>Completed
+            <span class="kanban-count" id="kanban-completed-count">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-completed"></div>
+        </div>
+        <div class="kanban-column" data-status="overdue">
+          <div class="kanban-column-header">
+            <span class="kanban-dot dot-overdue"></span>Overdue
+            <span class="kanban-count" id="kanban-overdue-count">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-overdue"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TEAM ==================== -->
+    <div id="page-team" class="page">
+      <div class="page-header">
+        <div class="page-header-top">
+          <div>
+            <h2>Team</h2>
+            <p>Manage your team members and roles</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('member-modal')">+ Add Member</button>
+        </div>
+      </div>
+      <div id="team-list" class="member-grid"></div>
+      <div id="no-team" class="empty-state" style="display: none;">
+        <div class="icon">&#128101;</div>
+        <h3>No team members yet</h3>
+        <p>Add team members to assign tasks</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Shortcuts -->
+  <div class="modal-overlay" id="shortcuts-modal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="modal-close" onclick="closeModal('shortcuts-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcut-list">
+          <div class="shortcut-item"><span class="shortcut-desc">Command palette</span><kbd>Ctrl+K</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Toggle theme</span><kbd>T</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Dashboard</span><kbd>1</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Meetings</span><kbd>2</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Tasks</span><kbd>3</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Team</span><kbd>4</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">New meeting</span><kbd>M</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">New task</span><kbd>N</kbd></div>
+          <div class="shortcut-item"><span class="shortcut-desc">Close</span><kbd>Esc</kbd></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Meeting -->
+  <div class="modal-overlay" id="meeting-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>New Meeting</h3>
+        <button class="modal-close" onclick="closeModal('meeting-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Meeting Title</label>
+          <input type="text" id="meeting-title" placeholder="e.g., Weekly Sync #5">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date & Time</label>
+            <input type="datetime-local" id="meeting-date">
+          </div>
+          <div class="form-group">
+            <label>Participants</label>
+            <input type="text" id="meeting-participants" placeholder="e.g., Karan Sir, Swagata">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('meeting-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-create-meeting" onclick="createMeeting()">Create Meeting</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Task -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>New Task</h3>
+        <button class="modal-close" onclick="closeModal('task-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="task-title" placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="task-description" placeholder="Additional details..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Assign To</label>
+            <select id="task-assignee"></select>
+          </div>
+          <div class="form-group">
+            <label>Deadline</label>
+            <input type="datetime-local" id="task-deadline">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="task-priority">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="task-status">
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('task-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-create-task" onclick="createTask()">Create Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Member -->
+  <div class="modal-overlay" id="member-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Team Member</h3>
+        <button class="modal-close" onclick="closeModal('member-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="member-name" placeholder="Full name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="member-email" placeholder="email@example.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" id="member-phone" placeholder="+91 ...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="member-role">
+            <option value="management">Management</option>
+            <option value="member" selected>Member</option>
+            <option value="consultant">Consultant</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('member-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-create-member" onclick="createMember()">Add Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meeting Detail -->
+  <div class="modal-overlay" id="meeting-detail-modal">
+    <div class="modal" style="max-width: 850px;">
+      <div class="modal-header">
+        <h3 id="detail-meeting-title">Meeting</h3>
+        <button class="modal-close" onclick="closeModal('meeting-detail-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="meeting-detail-body"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
