@@ -362,7 +362,7 @@ The goal isn't to replace meetings. It's to make sure every meeting **actually l
 
 ## License
 
-MIT — do whatever you want with it.
+MIT 
 
 <br>
 
