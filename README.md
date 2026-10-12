@@ -51,7 +51,7 @@ It takes your meeting recordings or transcripts, uses AI to generate structured 
 - **Kanban board** view with column grouping
 
 ### Team & Dashboard
-- Team members with roles (Management, Member, Consultant)
+- Team members with roles (Management, Member, FDE, Consultant)
 - Real-time stats with animated counters and SVG progress ring
 - Deadline alerts (3-day and 7-day windows)
 - Per-member workload breakdown
@@ -193,5 +193,5 @@ MIT
 ---
 
 <p align="center">
-  Built by <strong>Swagata Banerjee</strong>
+  Built by <strong>Swagata Banerjee</strong> — FDE at Micro Turners
 </p>
