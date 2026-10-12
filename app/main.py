@@ -8,7 +8,7 @@ from .routers import members, meetings, tasks, dashboard
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Micro Turners - Meeting & Task Manager")
+app = FastAPI(title="MOMentum - AI-Powered Meeting Intelligence")
 
 app.include_router(members.router)
 app.include_router(meetings.router)

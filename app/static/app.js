@@ -1363,6 +1363,6 @@ document.addEventListener("mousemove", (event) => {
 
 // ===== INIT =====
 
-logActivity("Session started", "Welcome to Micro Turners");
+logActivity("Session started", "Welcome to MOMentum");
 loadDashboard();
 populateMemberDropdowns();

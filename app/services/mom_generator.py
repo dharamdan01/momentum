@@ -16,7 +16,7 @@ async def generate_mom(transcript: str, meeting_title: str, participants: str) -
     """Generate a formal MOM from transcript using Claude."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
 
-    prompt = f"""You are a professional meeting minutes writer for Micro Turners.
+    prompt = f"""You are a professional meeting minutes writer.
 
 Given the following meeting transcript, generate a formal Minutes of Meeting (MOM) document.
 
