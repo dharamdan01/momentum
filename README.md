@@ -98,6 +98,31 @@ Record your meeting → get structured minutes in seconds → tasks auto-created
 <tr>
 <td width="50%">
 
+### Notifications & Reminders
+- **Email** reminders via SMTP (Gmail, Outlook, etc.)
+- **Telegram** bot notifications
+- Auto-reminders for upcoming deadlines (3-day window)
+- Overdue alerts sent to assignees
+- Management summary notifications with full team status
+- Per-member notification preferences (email / telegram / all)
+- Background scheduler runs every 6 hours
+- Manual trigger for instant reminders
+
+</td>
+<td width="50%">
+
+### Auth & Multi-User
+- JWT-based authentication (login / register)
+- Role-based access (management / member / FDE / consultant)
+- Management dashboard with team-wide visibility
+- Personal notification preferences per user
+- Secure password hashing (bcrypt)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
 ### Dashboard & Analytics
 - Real-time stats with animated counters
 - SVG progress ring for completion overview
@@ -129,6 +154,9 @@ Backend     →  Python · FastAPI · SQLAlchemy ORM
 Database    →  SQLite (zero-config, single file)
 AI (MOM)    →  Anthropic Claude API
 AI (Audio)  →  OpenAI Whisper API
+Auth        →  JWT (python-jose) + bcrypt
+Notifications → SMTP email + Telegram Bot API
+Scheduler   →  APScheduler (async, background)
 ```
 
 <br>
@@ -159,9 +187,19 @@ Add your keys in `.env`:
 ```env
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
+JWT_SECRET=any-random-string-here
+
+# Email reminders (optional)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Telegram reminders (optional — create a bot via @BotFather)
+TELEGRAM_BOT_TOKEN=your-bot-token
 ```
 
-> **No keys? No problem.** Meetings, tasks, team, and dashboard all work fully offline. AI features just need the keys.
+> **No keys? No problem.** Meetings, tasks, team, and dashboard all work fully offline. AI features need API keys, and notification channels are opt-in.
 
 ### 3. Run
 
@@ -178,25 +216,30 @@ Open **http://127.0.0.1:8000** — that's it.
 ```
 momentum/
 ├── app/
-│   ├── main.py                # FastAPI entry point, serves SPA
+│   ├── main.py                # FastAPI entry, migrations, scheduler startup
 │   ├── database.py            # SQLAlchemy engine + session
-│   ├── models.py              # Member, Meeting, Task
-│   ├── schemas.py             # Pydantic request/response models
+│   ├── models.py              # Member, Meeting, Task (with auth + notif fields)
+│   ├── schemas.py             # Pydantic models (incl. auth, notification prefs)
 │   │
 │   ├── routers/
+│   │   ├── auth.py            # Login, register, JWT token management
 │   │   ├── dashboard.py       # Stats, alerts, workload summary
 │   │   ├── meetings.py        # Meeting CRUD + AI pipeline
 │   │   ├── members.py         # Team CRUD
+│   │   ├── notifications.py   # Notification prefs, test, manual triggers
 │   │   └── tasks.py           # Task CRUD with filters
 │   │
 │   ├── services/
+│   │   ├── auth.py            # JWT + bcrypt password hashing
 │   │   ├── mom_generator.py   # Whisper + Claude integration
-│   │   └── reminder.py        # Overdue detection + alerts
+│   │   ├── notifications.py   # Email (SMTP) + Telegram bot sending
+│   │   ├── reminder.py        # Overdue detection + deadline alerts
+│   │   └── scheduler.py       # APScheduler — auto-reminders every 6h
 │   │
 │   └── static/
-│       ├── index.html         # SPA shell
+│       ├── index.html         # SPA shell (with login screen)
 │       ├── style.css          # Dual-theme, glassmorphism, animations
-│       └── app.js             # All client-side logic
+│       └── app.js             # Client-side logic (auth-aware)
 │
 ├── requirements.txt
 ├── .env.example
@@ -257,7 +300,32 @@ momentum/
 |--------|----------|-------------|
 | `GET` | `/api/members/` | List all members |
 | `POST` | `/api/members/` | Add member |
+| `PATCH` | `/api/members/{id}` | Update member |
 | `DELETE` | `/api/members/{id}` | Remove member |
+
+</details>
+
+<details>
+<summary><strong>Auth</strong> — Login & registration</summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/register` | Register a new user |
+| `POST` | `/api/auth/login` | Login, get JWT token |
+| `GET` | `/api/auth/me` | Get current user info |
+
+</details>
+
+<details>
+<summary><strong>Notifications</strong> — Reminders & preferences</summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `PATCH` | `/api/notifications/preferences` | Update notification prefs |
+| `POST` | `/api/notifications/test` | Send test notification |
+| `POST` | `/api/notifications/send-summary` | Trigger management summary |
+| `POST` | `/api/notifications/send-reminders` | Trigger full reminder cycle |
+| `GET` | `/api/notifications/status` | Check configured channels |
 
 </details>
 
@@ -344,10 +412,9 @@ MOMentum is that system.
 
 ### The vision
 
-Today, MOMentum handles the full meeting-to-task pipeline for small teams. Tomorrow:
+Today, MOMentum handles the full meeting-to-task pipeline with auto-reminders, multi-user auth, and notifications via email + Telegram. Tomorrow:
 
-- **Integrations** — Slack, Google Calendar, Zoom, Microsoft Teams
-- **Smart follow-ups** — auto-nudges when deadlines approach
+- **Integrations** — Slack, Google Calendar, Zoom, Microsoft Teams, WhatsApp
 - **Meeting analytics** — which meetings produce the most action? Which produce the most waste?
 - **Cross-meeting intelligence** — "This task was discussed in 3 meetings and still isn't done"
 - **Voice-first mobile app** — record on the go, tasks appear on your dashboard

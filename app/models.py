@@ -27,6 +27,9 @@ class Member(Base):
     email = Column(String(200))
     phone = Column(String(20))
     role = Column(String(50), default="member")
+    password_hash = Column(String(200))
+    telegram_chat_id = Column(String(100))
+    notification_pref = Column(String(20), default="email")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     tasks = relationship("Task", back_populates="assignee")

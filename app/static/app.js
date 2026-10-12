@@ -1,6 +1,140 @@
 const API_BASE = "";
 const activityLog = [];
 
+// ===== AUTH / TOKEN MANAGEMENT =====
+
+function getToken() { return localStorage.getItem("mt-token"); }
+function setToken(token) { localStorage.setItem("mt-token", token); }
+function clearToken() { localStorage.removeItem("mt-token"); }
+function getUser() {
+  try { return JSON.parse(localStorage.getItem("mt-user")); } catch { return null; }
+}
+function setUser(member) { localStorage.setItem("mt-user", JSON.stringify(member)); }
+function clearUser() { localStorage.removeItem("mt-user"); }
+
+function showAuthScreen() {
+  document.getElementById("auth-screen").style.display = "flex";
+  document.getElementById("app-header").style.display = "none";
+  document.getElementById("main-content").style.display = "none";
+}
+
+function hideAuthScreen() {
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app-header").style.display = "";
+  document.getElementById("main-content").style.display = "";
+}
+
+function showLogin() {
+  document.getElementById("auth-login-form").style.display = "";
+  document.getElementById("auth-register-form").style.display = "none";
+  document.getElementById("auth-error").style.display = "none";
+}
+
+function showRegister() {
+  document.getElementById("auth-login-form").style.display = "none";
+  document.getElementById("auth-register-form").style.display = "";
+  document.getElementById("auth-error").style.display = "none";
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById("auth-error");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function applyUserToUI(member) {
+  if (!member) return;
+  const initials = member.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const avatarEl = document.getElementById("user-avatar");
+  const avatarLg = document.getElementById("user-avatar-lg");
+  const nameEl = document.getElementById("user-dropdown-name");
+  const roleEl = document.getElementById("user-dropdown-role");
+  if (avatarEl) avatarEl.textContent = initials;
+  if (avatarLg) avatarLg.textContent = initials;
+  if (nameEl) nameEl.textContent = member.name;
+  if (roleEl) roleEl.textContent = member.role || "Member";
+}
+
+async function checkAuth() {
+  const token = getToken();
+  if (!token) {
+    showAuthScreen();
+    return;
+  }
+  try {
+    const member = await api("/api/auth/me");
+    setUser(member);
+    applyUserToUI(member);
+    hideAuthScreen();
+    initApp();
+  } catch {
+    clearToken();
+    clearUser();
+    showAuthScreen();
+  }
+}
+
+async function login() {
+  const name = document.getElementById("login-name").value.trim();
+  const password = document.getElementById("login-password").value;
+  if (!name || !password) return showAuthError("Name and password are required");
+
+  setLoading("btn-login", true);
+  try {
+    const res = await fetch(API_BASE + "/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Login failed");
+
+    setToken(data.token);
+    setUser(data.member);
+    applyUserToUI(data.member);
+    hideAuthScreen();
+    initApp();
+  } catch (e) {
+    showAuthError(e.message);
+  }
+  setLoading("btn-login", false);
+}
+
+async function register() {
+  const name = document.getElementById("register-name").value.trim();
+  const email = document.getElementById("register-email").value.trim() || null;
+  const password = document.getElementById("register-password").value;
+  if (!name || !password) return showAuthError("Name and password are required");
+
+  setLoading("btn-register", true);
+  try {
+    const res = await fetch(API_BASE + "/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, password, email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Registration failed");
+
+    setToken(data.token);
+    setUser(data.member);
+    applyUserToUI(data.member);
+    hideAuthScreen();
+    initApp();
+  } catch (e) {
+    showAuthError(e.message);
+  }
+  setLoading("btn-register", false);
+}
+
+function logout() {
+  clearToken();
+  clearUser();
+  showAuthScreen();
+  showLogin();
+  toast("Signed out", "info", 1500);
+}
+
 // ===== SPLASH SCREEN =====
 
 window.addEventListener("load", () => {
@@ -179,13 +313,16 @@ document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
 // ===== GREETING =====
 
-(function setGreeting() {
+function setGreeting() {
   const hour = new Date().getHours();
   let greeting = "Good evening";
   if (hour < 12) greeting = "Good morning";
   else if (hour < 17) greeting = "Good afternoon";
 
-  document.getElementById("greeting-heading").textContent = greeting;
+  const user = getUser();
+  const firstName = user ? user.name.split(" ")[0] : "";
+  document.getElementById("greeting-heading").textContent =
+    firstName ? `${greeting}, ${firstName}` : greeting;
 
   const dateStr = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
@@ -194,7 +331,7 @@ document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
     year: "numeric",
   });
   document.getElementById("greeting-text").textContent = dateStr;
-})();
+}
 
 // ===== AVATAR =====
 
@@ -263,8 +400,11 @@ const COMMANDS = [
   { name: "New Meeting", icon: "&#10010;", action: () => openModal("meeting-modal") },
   { name: "New Task", icon: "&#10010;", action: () => openModal("task-modal") },
   { name: "Add Team Member", icon: "&#10010;", action: () => openModal("member-modal") },
+  { name: "Notification Settings", icon: "&#128276;", action: () => openModal("notif-settings-modal") },
+  { name: "Send Reminders", icon: "&#128276;", action: () => triggerReminders() },
   { name: "Toggle Theme", icon: "&#127763;", action: () => toggleTheme() },
   { name: "Keyboard Shortcuts", icon: "&#9000;", action: () => openModal("shortcuts-modal") },
+  { name: "Sign Out", icon: "&#9211;", action: () => logout() },
 ];
 
 let commandIndex = 0;
@@ -363,6 +503,8 @@ document.addEventListener("click", () => {
 // ===== KEYBOARD SHORTCUTS =====
 
 document.addEventListener("keydown", (event) => {
+  if (document.getElementById("auth-screen").style.display !== "none") return;
+
   const tag = event.target.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
     if (event.key === "Escape") event.target.blur();
@@ -399,12 +541,22 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// Enter key on auth forms
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  const authScreen = document.getElementById("auth-screen");
+  if (authScreen.style.display === "none") return;
+  if (document.getElementById("auth-login-form").style.display !== "none") login();
+  else register();
+});
+
 // ===== MODALS =====
 
 function openModal(id) {
   document.getElementById(id).classList.add("active");
   document.body.style.overflow = "hidden";
   if (id === "task-modal") populateMemberDropdowns();
+  if (id === "notif-settings-modal") loadNotifSettings();
 }
 
 function closeModal(id) {
@@ -480,10 +632,17 @@ function deadlineLabel(dateStr) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(API_BASE + path, {
-    headers: { "Content-Type": "application/json", ...options.headers },
-    ...options,
-  });
+  const token = getToken();
+  const headers = { "Content-Type": "application/json", ...options.headers };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const response = await fetch(API_BASE + path, { headers, ...options });
+  if (response.status === 401) {
+    clearToken();
+    clearUser();
+    showAuthScreen();
+    throw new Error("Session expired");
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.detail || "Request failed");
@@ -633,9 +792,66 @@ function updateNotifDot(alerts) {
   dot.style.display = hasAlerts ? "" : "none";
 }
 
+async function loadNotifSettings() {
+  const user = getUser();
+  if (user) {
+    const pref = user.notification_pref || "email";
+    document.querySelectorAll('input[name="notif-pref"]').forEach(r => {
+      r.checked = r.value === pref;
+    });
+    document.getElementById("notif-telegram-id").value = user.telegram_chat_id || "";
+  }
+  try {
+    const status = await api("/api/notifications/status");
+    const el = document.getElementById("notif-channel-status");
+    const parts = [];
+    parts.push(status.email_configured ? "Email: configured" : "Email: not configured");
+    parts.push(status.telegram_configured ? "Telegram: configured" : "Telegram: not configured");
+    el.textContent = parts.join(" | ");
+  } catch { /* ignore */ }
+}
+
+async function saveNotificationPrefs() {
+  const pref = document.querySelector('input[name="notif-pref"]:checked')?.value || "email";
+  const telegramId = document.getElementById("notif-telegram-id").value.trim() || null;
+
+  try {
+    const updated = await api("/api/notifications/preferences", {
+      method: "PATCH",
+      body: JSON.stringify({ notification_pref: pref, telegram_chat_id: telegramId }),
+    });
+    setUser(updated);
+    toast("Preferences saved", "success");
+    closeModal("notif-settings-modal");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
+async function sendTestNotification() {
+  try {
+    await api("/api/notifications/test", { method: "POST" });
+    toast("Test notification sent!", "success");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
+async function triggerReminders() {
+  try {
+    await api("/api/notifications/send-reminders", { method: "POST" });
+    toast("Reminders sent!", "success");
+    logActivity("Sent reminders", "manual trigger");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
 // ===== DASHBOARD =====
 
 async function loadDashboard() {
+  setGreeting();
+
   const statsGrid = document.getElementById("stats-grid");
   showSkeleton(statsGrid, 5, "skeleton-stat");
 
@@ -1016,8 +1232,12 @@ async function uploadAudio(meetingId, input) {
   formData.append("file", file);
 
   try {
+    const token = getToken();
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     await fetch(`/api/meetings/${meetingId}/upload-audio`, {
       method: "POST",
+      headers,
       body: formData,
     });
     toast("Audio uploaded", "success");
@@ -1035,8 +1255,12 @@ async function saveTranscript(meetingId) {
   formData.append("transcript", text);
 
   try {
+    const token = getToken();
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     await fetch(`/api/meetings/${meetingId}/paste-transcript`, {
       method: "POST",
+      headers,
       body: formData,
     });
     toast("Transcript saved", "success");
@@ -1247,25 +1471,31 @@ async function loadTeam() {
     emptyState.style.display = "none";
     container.innerHTML = members
       .map(
-        (member) => `
-        <div class="member-card">
-          <div style="display:flex;justify-content:space-between;align-items:start;">
-            <div class="member-card-top">
-              ${avatar(member.name, "avatar-lg")}
-              <div>
-                <h3>${member.name}</h3>
-                <div class="role">${member.role}</div>
+        (member) => {
+          const notifBadge = member.notification_pref
+            ? `<span class="badge badge-pending" style="font-size:9px;">${member.notification_pref}</span>`
+            : "";
+          return `
+          <div class="member-card">
+            <div style="display:flex;justify-content:space-between;align-items:start;">
+              <div class="member-card-top">
+                ${avatar(member.name, "avatar-lg")}
+                <div>
+                  <h3>${member.name}</h3>
+                  <div class="role">${member.role} ${notifBadge}</div>
+                </div>
               </div>
+              <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">&#128465;</button>
             </div>
-            <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">&#128465;</button>
+            <div class="contact-info">
+              ${member.email ? `<div>&#9993; ${member.email}</div>` : ""}
+              ${member.phone ? `<div>&#9742; ${member.phone}</div>` : ""}
+              ${member.telegram_chat_id ? `<div>&#128172; Telegram: ${member.telegram_chat_id}</div>` : ""}
+              ${!member.email && !member.phone && !member.telegram_chat_id ? '<div style="color:var(--text-tertiary)">No contact info</div>' : ""}
+            </div>
           </div>
-          <div class="contact-info">
-            ${member.email ? `<div>&#9993; ${member.email}</div>` : ""}
-            ${member.phone ? `<div>&#9742; ${member.phone}</div>` : ""}
-            ${!member.email && !member.phone ? '<div style="color:var(--text-tertiary)">No contact info</div>' : ""}
-          </div>
-        </div>
-      `
+        `;
+        }
       )
       .join("");
     container.classList.add("stagger");
@@ -1344,7 +1574,7 @@ async function populateMemberDropdowns() {
       select.value = currentValue;
     });
   } catch (error) {
-    // Silently fail — dropdowns will just be empty
+    // Silently fail
   }
 }
 
@@ -1363,6 +1593,11 @@ document.addEventListener("mousemove", (event) => {
 
 // ===== INIT =====
 
-logActivity("Session started", "Welcome to MOMentum");
-loadDashboard();
-populateMemberDropdowns();
+function initApp() {
+  logActivity("Session started", "Welcome to MOMentum");
+  setGreeting();
+  loadDashboard();
+  populateMemberDropdowns();
+}
+
+checkAuth();

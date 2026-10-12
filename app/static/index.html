@@ -11,6 +11,54 @@
 </head>
 <body>
 
+  <!-- Auth Screen -->
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="splash-icon">M</div>
+        <div class="splash-text" style="font-size:20px;">MOMentum</div>
+        <div class="splash-sub" style="animation:none;opacity:1;">AI-Powered Meeting Intelligence</div>
+      </div>
+      <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+      <!-- Login Form -->
+      <div id="auth-login-form">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="login-name" placeholder="Your name" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="btn-login" onclick="login()">Sign In</button>
+        <div class="auth-toggle">
+          Don't have an account? <a href="#" onclick="showRegister();return false;">Register</a>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="auth-register-form" style="display:none;">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="register-name" placeholder="Your full name" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="register-email" placeholder="email@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="register-password" placeholder="Choose a password" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="btn-register" onclick="register()">Create Account</button>
+        <div class="auth-toggle">
+          Already have an account? <a href="#" onclick="showLogin();return false;">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Splash Screen -->
   <div class="splash-screen" id="splash">
     <div class="splash-logo">
@@ -44,7 +92,7 @@
   </div>
 
   <!-- Header -->
-  <header class="app-header">
+  <header class="app-header" id="app-header" style="display:none;">
     <div class="logo">
       <div class="logo-icon">M</div>
       <div class="logo-text">
@@ -95,18 +143,25 @@
         <div class="user-avatar" id="user-avatar">SB</div>
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dropdown-header">
-            <div class="user-avatar-lg">SB</div>
+            <div class="user-avatar-lg" id="user-avatar-lg">SB</div>
             <div>
-              <div class="user-dropdown-name">Swagata Banerjee</div>
-              <div class="user-dropdown-role">FDE</div>
+              <div class="user-dropdown-name" id="user-dropdown-name">User</div>
+              <div class="user-dropdown-role" id="user-dropdown-role">Member</div>
             </div>
           </div>
           <div class="user-dropdown-sep"></div>
+          <div class="user-dropdown-item" onclick="openModal('notif-settings-modal')">
+            &#128276; Notification Settings
+          </div>
           <div class="user-dropdown-item" onclick="openModal('shortcuts-modal')">
             &#9000; Keyboard Shortcuts
           </div>
           <div class="user-dropdown-item" onclick="toggleTheme()">
             &#127763; Toggle Theme
+          </div>
+          <div class="user-dropdown-sep"></div>
+          <div class="user-dropdown-item user-dropdown-logout" onclick="logout()">
+            &#9211; Sign Out
           </div>
         </div>
       </div>
@@ -114,7 +169,7 @@
   </header>
 
   <!-- Main Content -->
-  <div class="main-content">
+  <div class="main-content" id="main-content" style="display:none;">
 
     <!-- ==================== DASHBOARD ==================== -->
     <div id="page-dashboard" class="page active">
@@ -125,6 +180,7 @@
             <p id="greeting-text">Here's what's happening today</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-ghost" onclick="triggerReminders()" title="Send reminder notifications now">&#128276; Send Reminders</button>
             <button class="btn btn-ghost" onclick="openModal('meeting-modal')">+ Meeting</button>
             <button class="btn btn-primary" onclick="openModal('task-modal')">+ New Task</button>
           </div>
@@ -482,6 +538,42 @@
         <button class="modal-close" onclick="closeModal('meeting-detail-modal')">&times;</button>
       </div>
       <div class="modal-body" id="meeting-detail-body"></div>
+    </div>
+  </div>
+
+  <!-- Notification Settings -->
+  <div class="modal-overlay" id="notif-settings-modal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>Notification Settings</h3>
+        <button class="modal-close" onclick="closeModal('notif-settings-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Notification Channel</label>
+          <div class="notif-radio-group">
+            <label class="notif-radio">
+              <input type="radio" name="notif-pref" value="email" checked> Email
+            </label>
+            <label class="notif-radio">
+              <input type="radio" name="notif-pref" value="telegram"> Telegram
+            </label>
+            <label class="notif-radio">
+              <input type="radio" name="notif-pref" value="all"> All Channels
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Telegram Chat ID</label>
+          <input type="text" id="notif-telegram-id" placeholder="Your Telegram chat ID (message @userinfobot to find it)">
+        </div>
+        <div id="notif-channel-status" style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px;"></div>
+        <button class="btn btn-ghost" style="width:100%;margin-bottom:8px;" onclick="sendTestNotification()">&#128276; Send Test Notification</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('notif-settings-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNotificationPrefs()">Save Preferences</button>
+      </div>
     </div>
   </div>
 

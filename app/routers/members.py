@@ -15,7 +15,9 @@ def list_members(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=MemberOut)
 def create_member(member: MemberCreate, db: Session = Depends(get_db)):
-    db_member = Member(**member.model_dump())
+    data = member.model_dump()
+    data.pop("password", None)
+    db_member = Member(**data)
     db.add(db_member)
     db.commit()
     db.refresh(db_member)
@@ -27,6 +29,20 @@ def get_member(member_id: int, db: Session = Depends(get_db)):
     member = db.query(Member).filter(Member.id == member_id).first()
     if not member:
         raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+
+@router.patch("/{member_id}", response_model=MemberOut)
+def update_member(member_id: int, update: MemberCreate, db: Session = Depends(get_db)):
+    member = db.query(Member).filter(Member.id == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    data = update.model_dump(exclude_unset=True)
+    data.pop("password", None)
+    for field, value in data.items():
+        setattr(member, field, value)
+    db.commit()
+    db.refresh(member)
     return member
 
 

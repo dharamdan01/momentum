@@ -8,6 +8,8 @@ class MemberCreate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     role: str = "member"
+    telegram_chat_id: Optional[str] = None
+    notification_pref: str = "email"
 
 
 class MemberOut(BaseModel):
@@ -16,8 +18,32 @@ class MemberOut(BaseModel):
     email: Optional[str]
     phone: Optional[str]
     role: str
+    telegram_chat_id: Optional[str] = None
+    notification_pref: Optional[str] = "email"
 
     model_config = {"from_attributes": True}
+
+
+class LoginRequest(BaseModel):
+    name: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    name: str
+    password: str
+    email: Optional[str] = None
+    role: Optional[str] = "member"
+
+
+class LoginResponse(BaseModel):
+    token: str
+    member: MemberOut
+
+
+class NotificationPrefUpdate(BaseModel):
+    notification_pref: Optional[str] = None
+    telegram_chat_id: Optional[str] = None
 
 
 class TaskCreate(BaseModel):
