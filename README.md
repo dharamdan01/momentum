@@ -138,7 +138,7 @@ AI (Audio)  →  OpenAI Whisper API
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-username/momentum.git
+git clone https://github.com/gitswagata1/momentum.git
 cd momentum
 
 python -m venv venv
