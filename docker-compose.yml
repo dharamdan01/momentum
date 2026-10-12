@@ -1,0 +1,14 @@
+services:
+  momentum:
+    build: .
+    container_name: momentum
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data.db:/app/data.db
+      - ./uploads:/app/app/uploads
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
