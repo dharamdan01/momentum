@@ -15,6 +15,8 @@
 
 AI-powered meeting intelligence that records, transcribes, generates MOMs,<br>extracts tasks, and tracks everything — so nothing falls through the cracks.
 
+### **[Live Demo](https://momentum.loca.lt)**
+
 <br>
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
@@ -25,7 +27,7 @@ AI-powered meeting intelligence that records, transcribes, generates MOMs,<br>ex
 
 <br>
 
-[Getting Started](#-getting-started) · [Features](#-features) · [How It Works](#-how-it-works) · [API Reference](#-api-reference) · [Shortcuts](#-keyboard-shortcuts)
+[Live Demo](https://momentum.loca.lt) · [Getting Started](#-getting-started) · [Features](#-features) · [How It Works](#-how-it-works) · [API Reference](#-api-reference) · [Pitch Deck](MOMentum_Pitch.pptx)
 
 <br>
 
