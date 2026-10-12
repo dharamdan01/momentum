@@ -25,10 +25,14 @@ env/
 # Database
 *.db
 
-# Uploads
-uploads/
+# Uploads (keep directory, ignore contents)
+app/uploads/*
+!app/uploads/.gitkeep
 
 # OS files
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Logs
+*.log

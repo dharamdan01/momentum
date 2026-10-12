@@ -1,9 +1,9 @@
-import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
+from ..config import REMINDER_INTERVAL_HOURS, REMINDER_INITIAL_DELAY_MINUTES
 from ..database import SessionLocal
 from ..models import Task, TaskStatus, Member
 from .notifications import notify_task_reminder, notify_overdue, notify_management_summary
@@ -15,7 +15,6 @@ scheduler = AsyncIOScheduler()
 
 
 async def run_reminder_cycle():
-    """Check for overdue and upcoming tasks, send notifications."""
     logger.info("Running reminder cycle...")
     db = SessionLocal()
     try:
@@ -49,13 +48,13 @@ async def run_reminder_cycle():
 def start_scheduler():
     scheduler.add_job(
         run_reminder_cycle,
-        trigger=IntervalTrigger(hours=6),
+        trigger=IntervalTrigger(hours=REMINDER_INTERVAL_HOURS),
         id="reminder_cycle",
         replace_existing=True,
-        next_run_time=datetime.now(timezone.utc) + timedelta(minutes=1),
+        next_run_time=datetime.now(timezone.utc) + timedelta(minutes=REMINDER_INITIAL_DELAY_MINUTES),
     )
     scheduler.start()
-    logger.info("Scheduler started — reminders every 6 hours")
+    logger.info(f"Scheduler started — reminders every {REMINDER_INTERVAL_HOURS} hours")
 
 
 def stop_scheduler():

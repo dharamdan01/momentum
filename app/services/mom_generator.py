@@ -1,20 +1,18 @@
 import anthropic
-import os
+from openai import OpenAI
+
+from ..config import ANTHROPIC_API_KEY, OPENAI_API_KEY
 
 
 async def transcribe_audio(audio_path: str) -> str:
-    """Transcribe audio using OpenAI Whisper API."""
-    from openai import OpenAI
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+    client = OpenAI(api_key=OPENAI_API_KEY)
     with open(audio_path, "rb") as f:
         result = client.audio.transcriptions.create(model="whisper-1", file=f)
     return result.text
 
 
 async def generate_mom(transcript: str, meeting_title: str, participants: str) -> str:
-    """Generate a formal MOM from transcript using Claude."""
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     prompt = f"""You are a professional meeting minutes writer.
 
@@ -44,8 +42,7 @@ Keep it professional and concise. Use bullet points for clarity."""
 
 
 async def extract_tasks(mom_text: str) -> list[dict]:
-    """Extract action items from MOM text using Claude."""
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     prompt = f"""Extract all action items/tasks from this Minutes of Meeting.
 

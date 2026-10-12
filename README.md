@@ -17,7 +17,7 @@ AI-powered meeting intelligence — so nothing falls through the cracks.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-momentum.loca.lt-7C6CF6?style=for-the-badge&logo=vercel&logoColor=white)](https://momentum.loca.lt)
 &nbsp;&nbsp;
-[![Pitch Deck](https://img.shields.io/badge/Pitch_Deck-Download_PPT-A855F7?style=for-the-badge&logo=microsoftpowerpoint&logoColor=white)](MOMentum_Pitch.pptx)
+[![Pitch Deck](https://img.shields.io/badge/Pitch_Deck-Download_PPT-A855F7?style=for-the-badge&logo=microsoftpowerpoint&logoColor=white)](docs/MOMentum_Pitch.pptx)
 
 <br>
 
@@ -648,12 +648,29 @@ Sets up Python, venv, Nginx reverse proxy, systemd service, and SSL.
 momentum/
 │
 ├── app/
-│   ├── main.py                  # FastAPI entry · migrations · scheduler startup
-│   ├── database.py              # SQLAlchemy engine + session
-│   ├── models.py                # Member · Meeting · Task (with auth + notif fields)
-│   ├── schemas.py               # Pydantic models (auth, notifications, CRUD)
+│   ├── __init__.py
+│   ├── main.py                  # FastAPI entry · lifespan · router registration
+│   ├── config.py                # Centralized settings (all env vars in one place)
+│   ├── database.py              # SQLAlchemy engine + session factory
+│   ├── migrations.py            # SQLite ALTER TABLE migrations
 │   │
-│   ├── routers/
+│   ├── models/                  # SQLAlchemy ORM models (one per domain entity)
+│   │   ├── __init__.py          # Re-exports: Member, Meeting, Task, TaskStatus, TaskPriority
+│   │   ├── member.py            # Member model (auth fields, notification prefs)
+│   │   ├── meeting.py           # Meeting model (transcript, MOM, audio)
+│   │   └── task.py              # Task model + status/priority enums
+│   │
+│   ├── schemas/                 # Pydantic request/response models (one per domain)
+│   │   ├── __init__.py          # Re-exports all schemas
+│   │   ├── auth.py              # LoginRequest · RegisterRequest · LoginResponse
+│   │   ├── member.py            # MemberCreate · MemberOut
+│   │   ├── meeting.py           # MeetingCreate · MeetingOut
+│   │   ├── task.py              # TaskCreate · TaskUpdate · TaskOut
+│   │   ├── dashboard.py         # DashboardStats
+│   │   └── notification.py      # NotificationPrefUpdate
+│   │
+│   ├── routers/                 # API route handlers
+│   │   ├── __init__.py
 │   │   ├── auth.py              # Login · register · JWT management
 │   │   ├── dashboard.py         # Stats · alerts · workload summary
 │   │   ├── meetings.py          # Meeting CRUD + AI pipeline
@@ -661,30 +678,41 @@ momentum/
 │   │   ├── notifications.py     # Prefs · test · manual triggers
 │   │   └── tasks.py             # Task CRUD with filters
 │   │
-│   ├── services/
-│   │   ├── auth.py              # JWT + bcrypt password hashing
-│   │   ├── mom_generator.py     # Whisper + Claude integration
-│   │   ├── notifications.py     # Email (SMTP) + Telegram bot
-│   │   ├── reminder.py          # Overdue detection + deadline alerts
-│   │   └── scheduler.py         # APScheduler — auto-reminders every 6h
+│   ├── services/                # Business logic layer
+│   │   ├── __init__.py
+│   │   ├── auth.py              # JWT creation/validation + bcrypt hashing
+│   │   ├── mom_generator.py     # Whisper transcription + Claude MOM/task extraction
+│   │   ├── notifications.py     # Email (SMTP) + Telegram bot dispatch
+│   │   ├── reminder.py          # Overdue detection + deadline scanning
+│   │   └── scheduler.py         # APScheduler — background reminder cycle
 │   │
-│   └── static/
-│       ├── index.html           # SPA shell (login + dashboard)
-│       ├── style.css            # Dual-theme · glassmorphism · animations
-│       └── app.js               # Client-side logic (auth-aware)
+│   ├── static/                  # Frontend (vanilla SPA — no build step)
+│   │   ├── index.html           # Shell: login screen + dashboard layout
+│   │   ├── app.js               # Client-side logic (auth-aware, API calls)
+│   │   └── style.css            # Dual-theme · glassmorphism · animations
+│   │
+│   └── uploads/                 # Audio file storage (gitignored, .gitkeep)
+│       └── .gitkeep
 │
-├── deploy/
-│   ├── setup.sh                 # One-command server setup
-│   ├── update.sh                # Pull + restart
+├── deploy/                      # Production deployment configs
+│   ├── setup.sh                 # One-command Ubuntu server setup
+│   ├── update.sh                # Pull latest + restart service
 │   ├── nginx.conf               # Reverse proxy config
 │   └── momentum.service         # systemd unit file
 │
-├── Dockerfile
-├── docker-compose.yml
-├── render.yaml                  # Render one-click deploy
-├── requirements.txt
-├── .env.example
-└── .gitignore
+├── docs/                        # Presentation & pitch materials
+│   ├── MOMentum_Pitch.pptx      # 10-slide dark-themed PowerPoint
+│   ├── MOMentum_Pitch_Script.md # 8-minute spoken script + Q&A cheat sheet
+│   └── PRESENTATION.md          # Slide-by-slide outline
+│
+├── Dockerfile                   # Python 3.12-slim + gunicorn
+├── docker-compose.yml           # One-command Docker deployment
+├── render.yaml                  # Render one-click deploy blueprint
+├── requirements.txt             # Python dependencies
+├── .env.example                 # Template for environment variables
+├── .gitignore
+├── LICENSE                      # MIT
+└── README.md
 ```
 
 <br>

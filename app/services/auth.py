@@ -4,14 +4,10 @@ import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-import os
 
+from ..config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_HOURS
 from ..database import get_db
 from ..models import Member
-
-SECRET_KEY = os.getenv("JWT_SECRET", "momentum-secret-change-in-production")
-ALGORITHM = "HS256"
-TOKEN_EXPIRE_HOURS = 72
 
 security = HTTPBearer(auto_error=False)
 
@@ -25,9 +21,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_token(member_id: int, role: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS)
+    expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS)
     payload = {"sub": str(member_id), "role": role, "exp": expire}
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 def get_current_user(
@@ -37,7 +33,7 @@ def get_current_user(
     if not credentials:
         return None
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         member_id = int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         return None
@@ -51,7 +47,7 @@ def require_auth(
     if not credentials:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         member_id = int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

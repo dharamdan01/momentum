@@ -1,17 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from datetime import datetime
-import os
 import shutil
 
+from ..config import UPLOAD_DIR
 from ..database import get_db
 from ..models import Meeting, Task, Member
 from ..schemas import MeetingCreate, MeetingOut
 from ..services.mom_generator import transcribe_audio, generate_mom, extract_tasks
 
 router = APIRouter(prefix="/api/meetings", tags=["meetings"])
-
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 
 
 @router.get("/", response_model=list[MeetingOut])
@@ -42,8 +40,8 @@ async def upload_audio(meeting_id: int, file: UploadFile = File(...), db: Sessio
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-    file_path = os.path.join(UPLOAD_DIR, f"meeting_{meeting_id}_{file.filename}")
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = str(UPLOAD_DIR / f"meeting_{meeting_id}_{file.filename}")
     with open(file_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
 

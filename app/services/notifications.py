@@ -1,19 +1,12 @@
 import smtplib
-import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import httpx
 import logging
 
+from ..config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, TELEGRAM_BOT_TOKEN
+
 logger = logging.getLogger(__name__)
-
-SMTP_HOST = os.getenv("SMTP_HOST", "")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
-SMTP_FROM = os.getenv("SMTP_FROM", "")
-
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
 
 def send_email(to_email: str, subject: str, body: str) -> bool:
@@ -77,7 +70,6 @@ async def send_telegram(chat_id: str, message: str) -> bool:
 
 
 async def notify_member(member, subject: str, body: str, telegram_text: str | None = None):
-    """Send notification to a member via their preferred channel."""
     pref = getattr(member, "notification_pref", "email") or "email"
 
     if pref in ("email", "all") and member.email:
@@ -90,7 +82,6 @@ async def notify_member(member, subject: str, body: str, telegram_text: str | No
 
 
 async def notify_task_reminder(member, task) -> bool:
-    """Send a task deadline reminder to a member."""
     subject = f"Reminder: {task.title}"
 
     deadline_str = task.deadline.strftime("%d %b %Y") if task.deadline else "No deadline"
@@ -113,7 +104,6 @@ async def notify_task_reminder(member, task) -> bool:
 
 
 async def notify_overdue(member, task) -> bool:
-    """Send an overdue alert to a member."""
     subject = f"OVERDUE: {task.title}"
 
     deadline_str = task.deadline.strftime("%d %b %Y") if task.deadline else "No deadline"
@@ -135,7 +125,6 @@ async def notify_overdue(member, task) -> bool:
 
 
 async def notify_management_summary(manager, summary: list[dict]) -> bool:
-    """Send a task summary to management."""
     subject = "MOMentum — Task Status Summary"
 
     rows = ""

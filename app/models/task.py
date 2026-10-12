@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import enum
 
-from .database import Base
+from ..database import Base
 
 
 class TaskStatus(str, enum.Enum):
@@ -17,37 +17,6 @@ class TaskPriority(str, enum.Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
-
-
-class Member(Base):
-    __tablename__ = "members"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(200))
-    phone = Column(String(20))
-    role = Column(String(50), default="member")
-    password_hash = Column(String(200))
-    telegram_chat_id = Column(String(100))
-    notification_pref = Column(String(20), default="email")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-    tasks = relationship("Task", back_populates="assignee")
-
-
-class Meeting(Base):
-    __tablename__ = "meetings"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(300), nullable=False)
-    date = Column(DateTime, nullable=False)
-    participants = Column(Text)
-    transcript = Column(Text)
-    mom_text = Column(Text)
-    audio_file = Column(String(500))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-    tasks = relationship("Task", back_populates="meeting")
 
 
 class Task(Base):
