@@ -274,6 +274,92 @@ momentum/
 
 <br>
 
+## The Pitch
+
+<br>
+
+<div align="center">
+
+### **$37 billion** is wasted every year on unproductive meetings.
+
+*— Atlassian Workplace Research*
+
+</div>
+
+<br>
+
+The average employee sits through **62 meetings a month**. Most end with verbal agreements that no one writes down. Action items get buried in Slack threads, scribbled on sticky notes, or — worst case — forgotten entirely. A week later, the same items resurface in the next meeting. The cycle repeats.
+
+**MOMentum exists to kill that cycle.**
+
+<br>
+
+### What it does
+
+| Before MOMentum | After MOMentum |
+|:---|:---|
+| Someone furiously scribbles notes | AI generates structured minutes in seconds |
+| "Can you share the MOM?" — 3 days later | MOM is ready before the meeting room is empty |
+| Action items live in someone's head | Tasks auto-created with owners, deadlines, priorities |
+| "Wait, who was supposed to do that?" | Dashboard shows exactly who owns what |
+| Overdue tasks discovered in the next meeting | Real-time alerts before deadlines hit |
+
+<br>
+
+### Why it matters
+
+**For teams of 5–50 people**, meetings are the operating system of the company. Decisions happen there. Priorities shift there. Work gets assigned there. But there's no system to capture that output and track it to completion.
+
+MOMentum is that system.
+
+- **1 click** to transcribe a meeting
+- **1 click** to generate structured minutes
+- **1 click** to extract every action item
+- **0 clicks** to track deadlines — it does that automatically
+
+<br>
+
+### The market
+
+| Segment | Problem MOMentum solves |
+|---------|------------------------|
+| **Consulting firms** | Client meeting follow-ups slip through cracks |
+| **Startups** | Fast-moving teams lose track of who's doing what |
+| **Agencies** | Multiple client projects, dozens of weekly syncs |
+| **Engineering teams** | Sprint planning decisions vanish after standup |
+| **Leadership** | No visibility into whether meeting outcomes become reality |
+
+<br>
+
+### How it's different
+
+| Tool | What it does | What it misses |
+|------|-------------|----------------|
+| Otter.ai | Transcribes meetings | No task extraction, no tracking |
+| Notion | Organizes notes | Manual entry, no AI pipeline |
+| Asana / Linear | Tracks tasks | Tasks must be created manually |
+| **MOMentum** | **End-to-end: Record → Transcribe → MOM → Tasks → Track** | **Nothing. That's the point.** |
+
+<br>
+
+### The vision
+
+Today, MOMentum handles the full meeting-to-task pipeline for small teams. Tomorrow:
+
+- **Integrations** — Slack, Google Calendar, Zoom, Microsoft Teams
+- **Smart follow-ups** — auto-nudges when deadlines approach
+- **Meeting analytics** — which meetings produce the most action? Which produce the most waste?
+- **Cross-meeting intelligence** — "This task was discussed in 3 meetings and still isn't done"
+- **Voice-first mobile app** — record on the go, tasks appear on your dashboard
+
+The goal isn't to replace meetings. It's to make sure every meeting **actually leads somewhere**.
+
+<br>
+
+---
+
+<br>
+
 ## License
 
 MIT — do whatever you want with it.
