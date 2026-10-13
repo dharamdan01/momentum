@@ -34,6 +34,23 @@ uvicorn app.main:app --reload
 
 Open http://127.0.0.1:8000 to verify everything works.
 
+## Running Tests
+
+Install the project dependencies and pytest:
+
+```bash
+pip install -r requirements.txt
+pip install pytest
+```
+
+Run all tests from the project root:
+
+```bash
+pytest
+```
+
+Transcription tests use mocked OpenAI Whisper calls, so no real API key or network request is required.
+
 ## How to Contribute
 
 ### Reporting Bugs

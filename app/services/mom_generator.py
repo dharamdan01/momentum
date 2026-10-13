@@ -9,30 +9,21 @@ async def transcribe_audio(audio_path: str) -> str:
     with open(audio_path, "rb") as f:
         result = client.audio.transcriptions.create(model="whisper-1", file=f)
     return result.text
-
-
 async def generate_mom(transcript: str, meeting_title: str, participants: str) -> str:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
     prompt = f"""You are a professional meeting minutes writer.
-
 Given the following meeting transcript, generate a formal Minutes of Meeting (MOM) document.
-
 Meeting Title: {meeting_title}
 Participants: {participants}
-
 Transcript:
 {transcript}
-
 Generate the MOM with these sections:
 1. Meeting Details (title, date, participants)
 2. Agenda Items
 3. Discussion Summary (key points discussed)
 4. Action Items (in a table with: #, Action Item, Assigned To, Deadline)
 5. Key Decisions
-
 Keep it professional and concise. Use bullet points for clarity."""
-
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
