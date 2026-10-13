@@ -1,17 +1,17 @@
 <div align="center">
 
+<!-- Waving banner — Tokyo Night gradient -->
+[![header](https://capsule-render.vercel.app/api?type=waving&color=0:141e30,50:7C6CF6,100:e44d26&height=200&section=header&text=MOMentum&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Turn%20meetings%20into%20momentum.&descAlignY=55&descSize=18&descColor=f0e6d3)](https://github.com/gitswagata1/momentum)
+
+**AI-powered meeting intelligence — record, transcribe, generate MOMs, extract tasks, and track everything so nothing falls through the cracks.**
+
 <br>
 
-<img src="https://img.shields.io/badge/%E2%9A%A1-MOMentum-7C6CF6?style=for-the-badge&labelColor=09090F" alt="MOMentum" height="40">
-
-<br><br>
-
-# MOMentum
-
-**Turn meetings into momentum.**
-
-Record. Transcribe. Generate MOMs. Extract tasks. Track everything.<br>
-AI-powered meeting intelligence — so nothing falls through the cracks.
+[![GitHub Stars](https://img.shields.io/github/stars/gitswagata1/momentum?style=for-the-badge&logo=github&color=7C6CF6&labelColor=09090F)](https://github.com/gitswagata1/momentum/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/gitswagata1/momentum?style=for-the-badge&logo=github&color=A855F7&labelColor=09090F)](https://github.com/gitswagata1/momentum/network)
+[![GitHub Issues](https://img.shields.io/github/issues/gitswagata1/momentum?style=for-the-badge&logo=github&color=e44d26&labelColor=09090F)](https://github.com/gitswagata1/momentum/issues)
+[![License: MIT](https://img.shields.io/github/license/gitswagata1/momentum?style=for-the-badge&color=10B981&labelColor=09090F)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&labelColor=09090F)](CONTRIBUTING.md)
 
 <br>
 
@@ -28,11 +28,10 @@ AI-powered meeting intelligence — so nothing falls through the cracks.
 [![JWT Auth](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](#auth--multi-user)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)](#tech-stack)
 [![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](#deployment)
-[![MIT License](https://img.shields.io/badge/License-MIT-10B981?style=flat-square)](#license)
 
 <br>
 
-[Features](#features) · [Architecture](#system-architecture) · [Quick Start](#quick-start) · [API Reference](#api-reference) · [User Manual](docs/USER_MANUAL.md)
+[Features](#features) · [Architecture](#system-architecture) · [Quick Start](#quick-start) · [API Reference](#api-reference) · [Contributing](CONTRIBUTING.md) · [User Manual](docs/USER_MANUAL.md)
 
 <br>
 
@@ -1154,17 +1153,34 @@ Yes. Passwords are encrypted, sessions use secure tokens, and all data stays on 
 The goal isn't to replace meetings.<br>
 It's to make sure every meeting **actually leads somewhere**.
 
+</div>
+
+<br>
+
+## Contributing
+
+We welcome contributions from everyone! Whether it's a bug fix, new feature, or documentation improvement — every contribution helps.
+
+1. **Check** the [open issues](https://github.com/gitswagata1/momentum/issues) — look for `good first issue` labels
+2. **Read** the [Contributing Guide](CONTRIBUTING.md) for setup instructions and coding standards
+3. **Fork** the repo, create a branch, make your changes, and open a PR
+
+See the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
 <br>
 
 ---
 
+<div align="center">
+
 <br>
 
-**MIT License**
-
-Built by **[Swagata Banerjee](https://github.com/gitswagata1)** — FDE at Micro Turners
+**MIT License** · Built by **[Swagata Banerjee](https://github.com/gitswagata1)**
 
 *Stop losing action items. Start building MOMentum.*
 
 <br>
+
+[![footer](https://capsule-render.vercel.app/api?type=waving&color=0:e44d26,50:7C6CF6,100:141e30&height=100&section=footer)](https://github.com/gitswagata1/momentum)
+
 </div>
