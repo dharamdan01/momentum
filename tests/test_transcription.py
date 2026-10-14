@@ -20,7 +20,6 @@ def audio_file(tmp_path):
         audio.setframerate(16000)
         audio.writeframes(b"\x00\x00" * 1600)
     return path
-# this func test successful transcription
 def test_transcription_success_func(audio_file, mock_openai):
     client, constructor = mock_openai
     client.audio.transcriptions.create.return_value = SimpleNamespace(
@@ -35,9 +34,6 @@ def test_transcription_success_func(audio_file, mock_openai):
     )
 
 
-
-
-# this func test correct whisper model and binary audio
 def test_transcription_uses_whisper(audio_file, mock_openai):
     client, _ = mock_openai
     received = {}
@@ -54,8 +50,6 @@ def test_transcription_uses_whisper(audio_file, mock_openai):
     client.audio.transcriptions.create.assert_called_once()
 
 
-
-# this func test empty audio
 def test_empty_audio_file(tmp_path, mock_openai):
     client, _ = mock_openai
     path = tmp_path / "empty.wav"
@@ -71,9 +65,6 @@ def test_empty_audio_file(tmp_path, mock_openai):
     client.audio.transcriptions.create.assert_called_once()
 
 
-
-
-# this func test very short audio clip
 def test_short_audio_file(tmp_path, mock_openai):
     client, _ = mock_openai
     path = tmp_path / "short.wav"
@@ -95,10 +86,6 @@ def test_short_audio_file(tmp_path, mock_openai):
     client.audio.transcriptions.create.assert_called_once()
 
 
-
-
-
-# this func test unsupported audio format rejected by API
 def test_unsupported_format_file(tmp_path, mock_openai):
     client, _ = mock_openai
     path = tmp_path / "invalid.txt"
@@ -112,10 +99,6 @@ def test_unsupported_format_file(tmp_path, mock_openai):
     client.audio.transcriptions.create.assert_called_once()
 
 
-
-
-
-# this function test external API failure
 def test_api_failure(audio_file, mock_openai):
     client, _ = mock_openai
     client.audio.transcriptions.create.side_effect = RuntimeError(
@@ -131,9 +114,6 @@ def test_api_failure(audio_file, mock_openai):
     client.audio.transcriptions.create.assert_called_once()
 
 
-
-
-# this function test missing audio file
 def test_missing_audio_file(tmp_path, mock_openai):
     client, _ = mock_openai
     missing_path = tmp_path / "missing.wav"
